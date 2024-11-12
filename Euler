@@ -1,0 +1,75 @@
+from collections import defaultdict
+
+class Graph:
+    def __init__(self, vertices):
+        self.graph = defaultdict(list)
+        self.V = vertices  # số đỉnh
+    
+    # Hàm thêm cạnh vào đồ thị (đồ thị vô hướng)
+    def add_edge(self, u, v):
+        self.graph[u].append(v)
+        self.graph[v].append(u)
+    
+    # Hàm loại bỏ cạnh giữa hai đỉnh u và v
+    def remove_edge(self, u, v):
+        self.graph[u].remove(v)
+        self.graph[v].remove(u)
+    
+    # Hàm kiểm tra xem đồ thị có chứa chu trình Euler hay không
+    def is_eulerian(self):
+        # Kiểm tra tất cả các đỉnh có bậc chẵn
+        for v in self.graph:
+            if len(self.graph[v]) % 2 != 0:
+                return False
+        return True
+
+    # Thuật toán Hierholzer để tìm chu trình Euler
+    def find_eulerian_cycle(self):
+        if not self.is_eulerian():
+            print("Đồ thị không có chu trình Euler")
+            return None
+
+        # Khởi tạo chu trình Euler
+        stack = []
+        cycle = []
+        
+        # Bắt đầu từ đỉnh đầu tiên có cạnh kề
+        current_vertex = next(iter(self.graph))
+        stack.append(current_vertex)
+        
+        while stack:
+            if self.graph[current_vertex]:
+                # Nếu đỉnh hiện tại còn cạnh, chọn một đỉnh kề và di chuyển tới đó
+                next_vertex = self.graph[current_vertex][0]
+                stack.append(current_vertex)
+                
+                # Loại bỏ cạnh vừa đi qua
+                self.remove_edge(current_vertex, next_vertex)
+                
+                # Cập nhật đỉnh hiện tại
+                current_vertex = next_vertex
+            else:
+                # Nếu đỉnh hiện tại không còn cạnh, thêm vào chu trình Euler
+                cycle.append(current_vertex)
+                current_vertex = stack.pop()
+        
+        # Chu trình Euler đã hoàn thành
+        return cycle
+
+# Ví dụ sử dụng
+g = Graph(5)  # khởi tạo đồ thị với 5 đỉnh (đánh số từ 0 đến 4)
+g.add_edge(0, 1)
+g.add_edge(1, 2)
+g.add_edge(2, 3)
+g.add_edge(3, 0)
+g.add_edge(0, 4)
+g.add_edge(4, 1)
+g.add_edge(1, 3)
+g.add_edge(3, 4)
+
+# Tìm chu trình Euler
+eulerian_cycle = g.find_eulerian_cycle()
+if eulerian_cycle:
+    print("Chu trình Euler:", " -> ".join(map(str, eulerian_cycle)))
+else:
+    print("Không có chu trình Euler trong đồ thị")
