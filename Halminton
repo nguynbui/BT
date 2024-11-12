@@ -1,0 +1,78 @@
+class Graph:
+    def __init__(self, vertices):
+        self.graph = [[] for _ in range(vertices)]
+        self.V = vertices  # Số đỉnh
+    
+    # Hàm thêm cạnh vào đồ thị (đồ thị vô hướng)
+    def add_edge(self, u, v):
+        self.graph[u].append(v)
+        self.graph[v].append(u)
+    
+    # Hàm kiểm tra xem chu trình Hamilton có tồn tại hay không
+    def is_hamiltonian_cycle(self, path, pos):
+        # Kiểm tra nếu có cạnh từ đỉnh cuối cùng trong chu trình quay lại đỉnh đầu tiên
+        if path[pos - 1] in self.graph[path[0]]:
+            return True
+        return False
+
+    # Hàm kiểm tra xem có thể thêm đỉnh `v` vào vị trí `pos` trong đường đi Hamilton
+    def is_safe(self, v, path, pos):
+        # Kiểm tra nếu đỉnh `v` kề với đỉnh cuối cùng của chu trình
+        if v not in self.graph[path[pos - 1]]:
+            return False
+        
+        # Kiểm tra nếu đỉnh `v` đã có trong chu trình
+        if v in path:
+            return False
+
+        return True
+
+    # Hàm tìm chu trình Hamilton bằng thuật toán quay lui
+    def ham_cycle_util(self, path, pos):
+        # Nếu đã đi qua tất cả các đỉnh, kiểm tra xem có chu trình không
+        if pos == self.V:
+            if self.is_hamiltonian_cycle(path, pos):
+                return True
+            else:
+                return False
+        
+        # Thử tất cả các đỉnh tiếp theo
+        for v in range(1, self.V):
+            if self.is_safe(v, path, pos):
+                path[pos] = v
+                
+                # Đệ quy để xây dựng chu trình Hamilton
+                if self.ham_cycle_util(path, pos + 1):
+                    return True
+                
+                # Nếu không tìm được chu trình, loại bỏ đỉnh khỏi đường đi
+                path[pos] = -1
+        
+        return False
+
+    # Hàm tìm và in chu trình Hamilton, nếu có
+    def ham_cycle(self):
+        path = [-1] * self.V
+        path[0] = 0  # Bắt đầu từ đỉnh đầu tiên
+
+        if not self.ham_cycle_util(path, 1):
+            print("Không có chu trình Hamilton trong đồ thị")
+            return None
+        else:
+            # In chu trình Hamilton
+            path.append(path[0])  # Để tạo chu trình từ đỉnh cuối trở về đỉnh đầu
+            print("Chu trình Hamilton:", " -> ".join(map(str, path)))
+            return path
+
+# Ví dụ sử dụng
+g = Graph(5)  # khởi tạo đồ thị với 5 đỉnh (đánh số từ 0 đến 4)
+g.add_edge(0, 1)
+g.add_edge(1, 2)
+g.add_edge(2, 3)
+g.add_edge(3, 4)
+g.add_edge(4, 0)
+g.add_edge(0, 2)
+g.add_edge(2, 4)
+
+# Tìm chu trình Hamilton
+g.ham_cycle()
